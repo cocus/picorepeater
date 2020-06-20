@@ -1,0 +1,35 @@
+name: PlatformIO
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+        token: ${{ secrets.GitHub_PAT }}
+    - name: Build
+      run: |
+        docker run \
+        -v ${{ github.workspace }}:/opt/workspace \
+        --workdir /opt/workspace \
+        infinitecoding/platformio-for-ci \
+        /bin/bash -c "platformio run"
+    - name: Upload artifact (ELF)
+      uses: actions/upload-artifact@v1
+      with:
+        name: fw
+        path: .pio/build/nanoatmega328/firmware.elf
+    - name: Upload artifact (HEX)
+      uses: actions/upload-artifact@v1
+      with:
+        name: fw
+        path: .pio/build/nanoatmega328/firmware.hex
